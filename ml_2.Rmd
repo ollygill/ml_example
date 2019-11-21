@@ -1,6 +1,6 @@
 ---
 title: "Machine Learning Day 2"
-author: "David Kane"
+author: "Olly Gill"
 date: "11/20/2019"
 output: html_document
 ---
@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE)
 library(fs)
 library(tidymodels)
+library(gt)
 library(tidyverse)
 
 ```
@@ -86,6 +87,42 @@ x_1 <- clean %>%
 
 ```
 
+```{r}
+# How good is this model? Use the metrics() function from the yardstick packages
+# to explore that question.
 
+metrics(x_1, truth = dvote, estimate = pred_dvote) %>%
+  gt() %>%
+  tab_header("Model 1 Performance")
+```
+
+```{r}
+# Making a better model
+
+model_2 <- glm(data = clean, dvote ~ gender * party, family = "binomial")
+
+x_2 <- clean %>% 
+  mutate(prediction = predict(model_2, type = "response")) %>% 
+  mutate(pred_dvote = as.factor(ifelse(prediction > mean(prediction), "Yes", "No")))
+
+metrics(x_2, truth = dvote, estimate = pred_dvote) %>%
+  gt() %>%
+  tab_header("Model 2 Performance")
+
+```
+
+```{r}
+# Make another model
+
+model_3 <- glm(data = clean, dvote ~ gender + party + state + office, family = "binomial")
+
+x_3 <- clean %>% 
+  mutate(prediction = predict(model_3, type = "response")) %>% 
+  mutate(pred_dvote = as.factor(ifelse(prediction > mean(prediction), "Yes", "No")))
+
+metrics(x_3, truth = dvote, estimate = pred_dvote) %>%
+  gt() %>%
+  tab_header("Model 3 Performance")
+```
 
 
